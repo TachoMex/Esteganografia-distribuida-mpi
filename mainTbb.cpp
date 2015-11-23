@@ -75,7 +75,7 @@ int main(int argc, char**argv){
 	}
 	matrizInversa(llave, llavei);
 	cout<<"abriendo mensaje..."<<endl;
-	crearMatrizTexto(mensaje, "texto.txt");
+	crearMatrizTexto(mensaje, "mensaje.txt");
 	Matriz mensajec = concurrent_vector<concurrent_vector<double>>(N, concurrent_vector<double>(mensaje[0].size()));
 	Matriz mensaje2 = concurrent_vector<concurrent_vector<double>>(N, concurrent_vector<double>(mensaje[0].size()));
 	cout<<"cifrando mensaje..."<<endl;

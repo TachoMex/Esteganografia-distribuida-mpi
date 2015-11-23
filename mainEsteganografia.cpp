@@ -15,7 +15,7 @@ void incrustar(vector<color>& v, unsigned char c){
 	v[2].g=bool(c&1)+  (v[2].g&254);
 } 
 
-unsigned char extraer(vector<color> v){
+unsigned char extraer(color* v){
 	unsigned char c=0;
 	c+=(v[0].r&1)*128;
 	c+=(v[0].g&1)*64;
@@ -29,6 +29,8 @@ unsigned char extraer(vector<color> v){
 }
 
 void incrustar(imagen& I,const unsigned char *str,const unsigned char *end){
+	color * temp = I.pixels;
+	I.pixels+=2;
 	int size = (int)(end-str);
 	int contTam = 0;
 	for(int i=0;i<I.filas() and str!=end or contTam<16;i++){
@@ -43,29 +45,20 @@ void incrustar(imagen& I,const unsigned char *str,const unsigned char *end){
 				I.en(i,j-1)=v[1];
 				I.en(i,j)=v[2];
 			}
-			if(contTam<16){
-				bool tamDig = size&(1<<contTam++);
-				I.en(i,j).b= tamDig + (I.en(i,j).b&254);;
-			}
 		}
 	}
 }
 
 string extraer(imagen& I){
 	string s="";
-	int size=0;
-	int contTam = 0;
-	for(int i=0;i<I.filas();i++){
-		for(int j=2;j<I.columnas();j+=3){
-			vector<color> v(3);
-			v[0]=I.en(i,j-2);
-			v[1]=I.en(i,j-1);
-			v[2]=I.en(i,j);
-			s+=extraer(v);
-			if(contTam<16){
-				size+=bool(I.en(i,j).b&1)<<contTam++;
-			}
-		}
+	int size=500*8;
+	int contTam = 0;	
+
+	color * buff = I.pixels+6;
+
+	for(int i=0;i<size;i++){
+		s+=extraer(buff);
+		buff+=3;
 	}
 	return s.substr(0,size);
 }

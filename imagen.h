@@ -8,10 +8,9 @@ void swap(T& a, T& b){
 }
 
 class imagen{
-	private:
+	public:
 		color*pixels;
 		int x, y;
-	public:
 		imagen(int a, int b){
 			x=a;
 			y=b;
