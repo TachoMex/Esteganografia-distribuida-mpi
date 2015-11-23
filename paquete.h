@@ -90,7 +90,7 @@ public:
 	PaqueteSalida(int s, int pos){
 		size = s;
 		posicion = pos;
-		buff_size = s*3+2*sizeof(int);
+		buff_size = size+2*sizeof(int);
 		buffer = new unsigned char[buff_size];
 		guarda(s,0);
 		guarda(pos,sizeof(int));
@@ -101,7 +101,7 @@ public:
 	}
 
 	void guardaMensaje(unsigned char*buff){
-		memcpy(buff+2*sizeof(int), buff, size*3);
+		memcpy(buffer+2*sizeof(int), buff, size);
 	}	
 
 	int numeroTrama(){

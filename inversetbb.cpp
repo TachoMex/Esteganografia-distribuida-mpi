@@ -56,7 +56,9 @@ void guardaMensajeTexto(Matriz& m, const string& nom_arch){
 	for(int i=0;i<m.size();i++){
 		for(int j=0;j<m[0].size();j++){
 			f.put((char)floor(m[i][j]+0.5));
+			cout<<m[i][j]<<" ";
 		}
+		cout<<endl;
 	}
 	f.close();
 }
@@ -94,11 +96,10 @@ int main(int argc, char**argv){
 	matrizInversa(llave, llavei);
 	Matriz mensajec;
 	cargaMensajeCifrado(mensajec, "cifrado2.txt");
-	cout<<":v"<<endl;
 	Matriz mensaje = concurrent_vector<concurrent_vector<double>>(N, concurrent_vector<double>(mensajec[0].size()));
-	
+	cout<<mensajec.size()<<":"<<mensajec[0].size()<<endl;
 	cout<<"Recuperando mensaje..."<<endl;
-	multiplica(mensajec,llavei, mensaje);
+	multiplica(llavei,mensajec, mensaje);
 	cout<<"Guardando mensaje recuperado..."<<endl;
 	guardaMensajeTexto(mensaje, "texto2.txt");
 	return 0;

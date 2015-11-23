@@ -89,7 +89,7 @@ void multiplica(Matriz& a, Matriz& b,Matriz& c){
 
 void muestra(const Matriz& m){
 	for(int i=0;i<m.size();i++){
-		for(int j=0;j<m.size();j++){
+		for(int j=0;j<m[i].size();j++){
 			printf("%d ",(int)floor(m[i][j]+0.5));
 		}
 		cout<<endl;

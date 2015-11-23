@@ -4,6 +4,7 @@
 #include <mpi.h>
 #include "imagen.h"
 #include <iostream>
+#include <iomanip>
 
 
 #include "paquete.h"
@@ -65,6 +66,19 @@ void incrustar(color* v, unsigned char c){
 	v[2].g=bool(c&1)+  (v[2].g&254);
 } 
 
+unsigned char extraer(color* v){
+	unsigned char c=0;
+	c+=(v[0].r&1)*128;
+	c+=(v[0].g&1)*64;
+	c+=(v[0].b&1)*32;
+	c+=(v[1].r&1)*16;
+	c+=(v[1].g&1)*8;
+	c+=(v[1].b&1)*4;
+	c+=(v[2].r&1)*2;
+	c+=(v[2].g&1)*1;
+	return c;
+}
+
 
 int main(int argc, char *argv[]){
 	const int MASTER = 0;
@@ -119,15 +133,25 @@ int main(int argc, char *argv[]){
 		}
 
 		unsigned char *buffer = new unsigned char[I.filas()*I.columnas()];
-		memset(I.pixels,0,sizeof(I.pixels));
+		//memset(I.pixels,0,sizeof(color)*I.x*I.y);
+		bool space = 0;
+		int salto = 1;
 		for(dest = 1; dest < numTasks; dest++){
 			rc = MPI_Recv(buffer, I.filas()*I.columnas(), MPI_CHAR, dest, MASTER, MPI_COMM_WORLD, &Stat);
-			cout<<"Recibida trama"<<endl;
+			cout<<"Recibida trama"<<rc<<endl;
 			PaqueteSalida ps;
 			ps.buffer = buffer;
 			int posBuffer = ps.numeroTrama();
 			int tam = ps.tamMensaje();
-			memcpy(I.pixels+posBuffer, ps.punteroMensaje(), tam);
+			cout<<"Recibidos pixels de "<<posBuffer<<" a "<<posBuffer+tam<<endl;
+			unsigned char*tmp = ps.punteroMensaje();
+			memcpy(((unsigned char*)I.pixels)+posBuffer, ps.punteroMensaje(), tam);
+			/*for(int i = 30;i<400*3;i+=3){
+				cout<<hex<<setw(2)<<setfill('0')<<(int)extraer(I.pixels+i)<<(space?" ":"")<<(salto?"":"\n");
+				space=!space;
+				salto=(salto+1)%32;
+			}
+			*/
 		}
 
 		incrustar(I.pixels, size&255);
@@ -182,7 +206,7 @@ int main(int argc, char *argv[]){
 		I.x = paq.tamImagenY();
 
 		int numTrama = paq.numeroTrama();
-		printf("Se recibio el paquete en %d\n",numTrama);
+		printf("Se recibio el paquete en %d %d\n",numTrama,rc);
 		// Get how big the message is and put it in 'count'
 
 		Matriz llave = new double[N*N];
@@ -200,11 +224,14 @@ int main(int argc, char *argv[]){
 		if(numTrama == totalTramas){
 			Rf = R;
 		}
+
+		memset(cifrado,0,sizeof(cifrado));
+
 		for(int i=Ri;i<Rf;i++){
 			for(int j=0;j<C;j++){
-				cifrado[i*C+j]=0;
 				for(int k=0;k<N;k++){
-					cifrado[i*C+j]+=llave[i*C+k]+mensaje[k*C+j];
+					//cout<<llave[i*N+k]<<":"<<mensaje[k*C+j]<<" ";
+					cifrado[i*C+j]+=llave[i*N+k]+mensaje[k*C+j];
 				}
 				cout<<cifrado[i*C+j]<<" ";
 			}
@@ -212,7 +239,7 @@ int main(int argc, char *argv[]){
 		}
 
 		unsigned char *ptrMsjI = (unsigned char*)(cifrado+Ri*C);
-		unsigned char *ptrMsjF = (unsigned char*)(cifrado+Ri*C);
+		unsigned char *ptrMsjF = (unsigned char*)(cifrado+Rf*C);
 
 		color* memoria = I.pixels + (2+sizeof(double)*Ri*C+sizeof(int)*2)*3;
 		color* ptrPaquete = memoria;
@@ -220,14 +247,22 @@ int main(int argc, char *argv[]){
 			incrustar(memoria, *i);
 			memoria+=3;
 		}
+		
+		cout<<"Bytes modificados: "<<memoria-ptrPaquete<<endl;
 
-		PaqueteSalida ps(memoria-ptrPaquete, ptrPaquete-I.pixels);
-		ps.guardaMensaje((unsigned char*)ptrMsjI);
+		PaqueteSalida ps((memoria-ptrPaquete)*9, (ptrPaquete-I.pixels)*3);
+		ps.guardaMensaje((unsigned char*)ptrPaquete);
+		bool space = false;
+		/*int salto  =1;
+		for(int i = 0;i<512;i++){
+			cout<<hex<<setw(2)<<setfill('0')<<(int)(((unsigned char*)ptrMsjI)[i])<<(space?" ":"")<<(salto?"":"\n");
+			space=!space;
+			salto=(salto+1)%32;
+		}*/
 
 		cout<<"El proceso "<<numTrama<<" ha terminado y enviado resultado"<<endl;
 
-		rc = MPI_Send(ps.buffer, sizeof(ps.buffer), MPI_CHAR, MASTER, MASTER, MPI_COMM_WORLD);
-
+		rc = MPI_Send(ps.buffer, ps.buff_size, MPI_CHAR, MASTER, MASTER, MPI_COMM_WORLD);
 
 		I.pixels = NULL;
 	}
