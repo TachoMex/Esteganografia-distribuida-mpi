@@ -24,7 +24,9 @@ void cargaLLave(Matriz& x, const string& s){
 	for(int i=0;i<N;i++){
 		for(int j=0;j<N;j++){
 			f>>x[i*N+j];
+		//	cout<<x[i*N+j]<<" ";
 		}
+//		cout<<endl;
 	}
 	f.close();
 }
@@ -35,9 +37,9 @@ void crearMatrizTexto(Matriz& m, const char* mensaje, int size, int& R, int& C){
 	C = size / N;
 	int relleno = R * C - size;
 
-	if(relleno){
+/*	if(relleno){
 		C++;
-	}
+	}*/
 
 	m = new double[R*C];
 	memset(m,0,sizeof m);
@@ -48,8 +50,9 @@ void crearMatrizTexto(Matriz& m, const char* mensaje, int size, int& R, int& C){
 	for(int i=0;i<R;i++){
 		for(int j=0;j<C;j++){
 			if(k>=size)
-				return;
-			m[i*C+j] = mensaje[k++];
+				m[i*C+j]=0.0;
+			else
+				m[i*C+j] = mensaje[k++];
 		}
 	}
 
@@ -161,9 +164,9 @@ int main(int argc, char *argv[]){
 		int C = size / N;
 		int relleno = R * C - size;
 
-		if(relleno){
+		/*if(relleno){
 			C++;
-		}
+		}*/
 
 		unsigned char* ptr = (unsigned char*)&R;
 		for(int i=0;i<sizeof(int);i++){
@@ -231,7 +234,7 @@ int main(int argc, char *argv[]){
 			for(int j=0;j<C;j++){
 				for(int k=0;k<N;k++){
 					//cout<<llave[i*N+k]<<":"<<mensaje[k*C+j]<<" ";
-					cifrado[i*C+j]+=llave[i*N+k]+mensaje[k*C+j];
+					cifrado[i*C+j]+=llave[i*N+k]*mensaje[k*C+j];
 				}
 				cout<<cifrado[i*C+j]<<" ";
 			}

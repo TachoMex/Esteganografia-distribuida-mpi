@@ -55,7 +55,7 @@ void guardaMensajeTexto(Matriz& m, const string& nom_arch){
 	ofstream f(nom_arch);
 	for(int i=0;i<m.size();i++){
 		for(int j=0;j<m[0].size();j++){
-			f.put((char)floor(m[i][j]+0.5));
+			f.put((char)max(0,(int)floor(m[i][j]+0.5)));
 			cout<<m[i][j]<<" ";
 		}
 		cout<<endl;
